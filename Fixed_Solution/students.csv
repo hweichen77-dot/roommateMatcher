@@ -1,0 +1,33 @@
+Full Name,Legal First Name,Legal Last Name,Grade:,Gender,Number of Requested Roommates (including yourself):,Request 1,Roommate 1's Grade:,Request 2,Roommate 2's Grade:,Request 3,Roommate 3's Grade:,Special Requests
+Elena Cho,Elena,Cho,10,Female,1,,,,,,,
+Nils Ghosh,Nils,Ghosh,9,Male,1,,,,,,,
+Diego Sandoval,Diego,Sandoval,12,Male,1,,,,,,,Quiet floor preferred
+Bdoil Costa,Bodil,Costa,10,Female,1,,,,,,,
+Meera Espinoza,Meera,Espinoza,11,Male,1,,,,,,,Near teammate if possible
+Emilio Aguilar,Emilio,Aguilar,9,Female,1,,,,,,,
+Bodil Wahlberg,Bodil,Wahlberg,10,Male,1,,,,,,,
+Dario Adeyemi,Dario,,12,Female,1,,,,,,,
+Luacs Wojcik,Lucas,Wojcik,11,Female,4,Bisi Espinoza,11,Bisi Espinoza,11,Rosa Okafor,11,
+Bisi Espinoza,Bisi,Espinoza,11,Female,4,Lucas Wojcik,11,Rosa Okafor,11,Valeria Cardoso,11,
+Roas Okafor,Rosa,Okafor,11,Female,4,Bisi Espinoza,11,Lucas Wojcik,11,Valeria Cardoso,11,Quiet room preferred
+Valeria Cardoso,Valeria,Cardoso,11,Female,4,Bisi Espinoza,11,Lucas Wojcik,11,Rosa Okafor,11,
+Lena Engelhart,Lena,Engelhart,9,Female,4,Nour Tanaka,9,Esi Kowalczyk,9,Mai Yamamoto,9,
+Nour Tanaka,Nour,Tanaka,9,Female,4,Lena Engelhart,9,Esi Kowalczyk,9,Mai Yamamoto,9,
+Eis Kowalczyk,Esi,Kowalczyk,9,Female,4,Lena Engelhart,9,Nour Tanaka,9,Mai Yamamoto,9,Late arrival Friday
+Mai Yamamoto,Mai,Ymaamoto,9,Female,4,Lena Engelhart,9,Nour Tanaka,9,Esi Kowalczyk,9,
+Bruno Lindgren,Bruno,Lindgren,11,Female,4,Valeria Marchetti,11,Fatima Salazar,11,Karol Liu,11,
+Valeria Marchetti,Valeria,Marchetti,11,Female,4,Noah Lindqvist,11,Fatima Salazar,11,Karol Liu,11,
+Fatima Salazar,Fatima,Salazar,11,Female,4,Bruno Lindgren,11,Valeria Marchetti,11,Karol Liu,11,
+Karol Liu,Karol,Liu,11,Female,4,Bruno Lindgren,11,Valeria Marchetti,11,Fatima Salazar,11,
+Femi Gutierrez,Femi,Gutierrez,10,Female,4,Ewa Karlsson,10,Quan Kristiansen,10,Rami Ivanova,10,
+Ewa Karlsson,Ewa,Karlsson,10,Female,4,Femi Gutierrez,10,Quan Kristiansen,10,Rami Ivanova,10,
+Quan Kristiansen,Quan,Kristiansen,10,Female,4,Femi Gutierrez,10,Ewa Karlsson,10,Rami Ivanova,10,
+Rami Ivanova,Rami,Ivanova,10,Female,4,Femi Gutierrez,11,Ewa Karlsson,10,Quan Kristiansen,10,
+Mateo Jokinen,Mateo,Jokinen,12,Female,4,Sade Jansen,12,Dmitri Larsen,12,Katya Stavros,12,
+Sade Jansen,Sade,Jansen,12,Femle,4,Mateo Jokinen,12,Dmitri Larsen,12,Katya Stavros,12,
+Dmitri Larsen,Dmitri,Larsen,12,Female,4,Mateo Jokinen,12,Sade Jansen,12,Katya Stavros,12,
+Katya Stavros,Katya,Stavros,12,Female,4,Mateo Jokinen,12,Sade Jansen,12,Dmitri Larsen,12,Needs early check-in
+Samir Rasmussen,Samir,Rasmussen,10,Female,4,Kofi Hoang,10,Sasha Moreau,10,Mai Antonsen,10,
+Kofi Hoang,Kofi,Hoang,10,Female,5,Samir Rasmussen,10,Sasha Moreau,10,Mai Antonsen,10,
+Sasha Moreau,Sasha,Moreau,10,Female,4,Samir Rasmussen,10,Kofi Hoang,10,Mai Antonsen,10,
+Mia Antonsen,Mai,Antonsen,10,Female,4,Samir Rasmussen,10,Kofi Hoang,10,Sasha Moreau,10,

@@ -1,0 +1,41 @@
+Yo mb for making everything really complicated I hop this txt file helps you understand how to run it. 
+You'll be using terminal for most of the steps so make sure you have it open.
+These instructions are only for macos btw
+
+If you dont know what terminal is its a app that lets you run commands within your system. Press cmd + space and then type terminal and press enter to access it. 
+
+1) install g++(c++ compiler) and python3
+
+for g++, just type xcode-select --install into the terminal and press enter
+for python3, go to https://www.python.org/downloads/ and download/intstall python3 from there 
+
+to double check that you installed everything, run python3 --version and g++ --version
+
+2) Move all the files from Fixed_Solution into a seperate folder and then move that folder under the current user or the desktop. For example, I would place my folder under the user JasonHuang. This is since the terminal will only access files from the user that is currenly logged in. 
+
+Link for downloading all the files: download this repository, everything you need is in the Fixed_Solution folder.
+
+3)install the openpyxl library with the command pip3 install pandas openpyxl
+
+Alright now you can acutally run everything 
+
+4)Open terminal, and type in cd /path/to/your/folder (replace /path/to/your/folder with the acutal directory of your folder. For example, if my folder was on my desktop I would replace it with 
+cd ~/Desktop/folder_name. Make sure to replace folder_name with whatever your folder is called. Preferably make the name just one word)
+
+5)Run the following commands in order:
+
+chmod +x run.sh
+chmod 644 students.csv
+./run.sh
+
+6)Check the results
+
+There should be 4 new files within the same folder:
+
+errors_raw.csv (raw list of errors passed on from error_detector.cpp to generate_report.py)
+error_report.xlsx (detailed report of all the errors)
+room_assignments.csv (final room assignments)
+Students_corrected.csv (fixed students.csv file)
+
+I hope all of this made sense if yall have any questions feel free to ask me.
+If anyone is having trouble running the code I can always demonstrate it in person.

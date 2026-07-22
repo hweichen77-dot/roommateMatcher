@@ -1,6 +1,6 @@
 # Roommate Matcher
 
-Roommate assignment for a school trip. Students submit a form listing who they want to room with, and the matcher groups them into rooms of four while respecting grade and gender constraints.
+Roommate assignment for a DECA conferences. Students submit a form listing who they want to room with, and the matcher groups them into rooms of four while respecting grade and gender constraints.
 
 The problem is that the form responses are messy. Students misspell each other's names, list a grade that does not match the roster, request themselves, or fill in a name that belongs to nobody. The matcher assumes clean input, so a single typo silently drops a student out of their group.
 

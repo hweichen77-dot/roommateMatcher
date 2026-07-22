@@ -1,6 +1,8 @@
 # Roommate Matcher
 
-Roommate assignment for a DECA conferences. Students submit a form listing who they want to room with, and the matcher groups them into rooms of four while respecting grade and gender constraints.
+> **This is not a new project.** It is a copy of [natmkk/roommateMatcher](https://github.com/natmkk/roommateMatcher), published here so my own contributions to it are readable in one place. The matcher was written by Grace Xu and allisonlao, with later additions by natmkk. My work was done in March 2026 in my fork of that repository, before this copy existed, so the commit history here is just the import and does not reflect when the work happened. What I added is described under [What I contributed](#what-i-contributed).
+
+Roommate assignment for DECA conferences. Students submit a form listing who they want to room with, and the matcher groups them into rooms of four while respecting grade and gender constraints.
 
 The problem is that the form responses are messy. Students misspell each other's names, list a grade that does not match the roster, request themselves, or fill in a name that belongs to nobody. The matcher assumes clean input, so a single typo silently drops a student out of their group.
 
@@ -8,7 +10,7 @@ This repository adds a validation stage that runs before the matcher, catches th
 
 ## What I contributed
 
-This repository is a copy of [natmkk/roommateMatcher](https://github.com/natmkk/roommateMatcher). The matcher itself was written by Grace Xu and allisonlao, with later additions by natmkk. My work is the `Fixed_Solution/` directory, about 1,100 lines added across nine files, which I committed to my fork in March 2026.
+The matcher itself was written by Grace Xu and allisonlao, with later additions by natmkk. My work is the `Fixed_Solution/` directory, about 1,100 lines across nine files, which I committed to my fork of [natmkk/roommateMatcher](https://github.com/natmkk/roommateMatcher) on March 20 and 21, 2026. That fork is where the real history and dates live. This copy came later and exists only to make the work readable.
 
 To be clear about the boundary: `Fixed_Solution/roomateMatcher.py` and `Fixed_Solution/validation.py` are unmodified copies of the original authors' files, included so the folder runs on its own. Everything else in that directory is mine.
 
@@ -44,7 +46,7 @@ Reads the detected errors back in and applies the fixes to produce `students_cor
 
 ### A note on the data in this repository
 
-The input files here are generated sample data. The real trip ran on forms containing student names, school email addresses, and student ID numbers, none of which are published here.
+The input files here are generated sample data. The real conference ran on forms containing student names, school email addresses, and student ID numbers, none of which are published here.
 
 The sample roster is built to behave like the real one. It has the same row counts, the same deliberately seeded mistakes, and the same relationships between the roster and the form responses, including the misspelled email domains that appear in the real file. Running the detector against it produces 39 errors across all 8 categories, which matches the real data exactly.
 

@@ -52,7 +52,9 @@ The sample roster is built to behave like the real one. It has the same row coun
 
 ## Running it
 
-You need `g++` and Python 3 with `pandas` and `openpyxl`.
+You need `g++` and Python 3. The run script installs `pandas` and `openpyxl`.
+
+On macOS or Linux:
 
 ```bash
 cd Fixed_Solution
@@ -60,7 +62,21 @@ chmod +x run.sh
 ./run.sh
 ```
 
-That produces four files:
+On Windows, install the tools once from PowerShell, then open a new PowerShell window:
+
+```powershell
+winget install -e --id Python.Python.3.12
+winget install -e --id BrechtSanders.WinLibs.POSIX.UCRT
+```
+
+Then run it:
+
+```powershell
+cd Fixed_Solution
+.\run.bat
+```
+
+Either script produces four files:
 
 - `errors_raw.csv`, the detected errors
 - `error_report.xlsx`, the readable version of the same

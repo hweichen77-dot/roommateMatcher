@@ -3,6 +3,7 @@
 __pycache__/
 
 Fixed_Solution/error_detector
+Fixed_Solution/error_detector.exe
 Fixed_Solution/errors_raw.csv
 Fixed_Solution/error_report.xlsx
 Fixed_Solution/students_corrected.csv

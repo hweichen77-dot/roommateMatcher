@@ -55,12 +55,16 @@ Close PowerShell and open it again so it can find the new programs. To double ch
 
 2) Download this repository, unzip it, and go to the Fixed_Solution folder. For example, if you unzipped it to your Downloads folder:
 
-cd $HOME\Downloads\roommateMatcher-main\Fixed_Solution
+cd $HOME\Downloads\roommateMatcher-main\roommateMatcher-main\Fixed_Solution
 
 3) Run it:
 
 .\run.bat
 
-It installs pandas and openpyxl for you, then makes the same 4 files listed in step 6 above.
+It installs pandas and openpyxl for you, then makes all the files except the roommate assignments.
 
 Use run.bat on Windows and skip the commands from the Mac steps. If you type .\error_detector.exe > errors_raw.csv into the default PowerShell yourself, it saves the file as UTF-16 and the next step crashes. run.bat avoids that.
+
+4) Run the roommate assignment code
+
+Double click the roommateMatcher code (within your Fixed_Solution folder) then it will start running. Will take about 5-10 mins.

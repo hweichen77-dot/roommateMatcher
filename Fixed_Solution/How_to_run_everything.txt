@@ -6,6 +6,10 @@ If you dont know what terminal is its a app that lets you run commands within yo
 
 MACOS
 
+0)
+
+Remove all the non competes and duplicates.
+
 1) install g++(c++ compiler) and python3
 
 for g++, just type xcode-select --install into the terminal and press enter
@@ -45,6 +49,10 @@ If anyone is having trouble running the code I can always demonstrate it in pers
 WINDOWS
 
 Use PowerShell for these. Press the Windows key, type powershell, and press enter.
+
+0)
+
+Remove all the non competes and duplicates.
 
 1) Install python and g++ (only needed once):
 

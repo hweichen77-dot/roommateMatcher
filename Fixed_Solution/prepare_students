@@ -1,0 +1,78 @@
+import os
+import re
+import shutil
+import pandas as pd
+
+SRC = "students.csv"
+BACKUP = "students_original.csv"
+
+# Keep an untouched copy the first time; always rebuild from that copy,
+# so running this twice is safe.
+if not os.path.exists(BACKUP):
+    shutil.copyfile(SRC, BACKUP)
+
+df = pd.read_csv(BACKUP, dtype=str, keep_default_na=False)
+df.columns = [c.strip() for c in df.columns]
+df = df.rename(columns={
+    "Legal First Name:": "Legal First Name",
+    "Legal Last Name:": "Legal Last Name",
+})
+
+SINGLE_NAME = "Requested Roommate Name: (First Last) Ex.: John Smith"
+SINGLE_GRADE = "Requested Roommate's Grade:"
+COUNT = "Number of Requested Roommates (including yourself):"
+PLACEHOLDERS = {"", "n/a", "na", "none", "-", "nan"}
+
+
+def clean(v):
+    return re.sub(r"\s+", " ", str(v).replace("\xa0", " ")).strip()
+
+
+def clean_grade(v):
+    v = clean(v)
+    if v.lower() in PLACEHOLDERS:
+        return ""
+    try:
+        return str(int(float(v)))
+    except ValueError:
+        return v
+
+
+before = (df[["Request 1", "Request 2", "Request 3"]].map(lambda x: clean(x).lower() not in PLACEHOLDERS).any(axis=1)).sum()
+
+for idx, row in df.iterrows():
+    candidates = []
+    if SINGLE_NAME in df.columns:
+        candidates.append((row[SINGLE_NAME], row.get(SINGLE_GRADE, "")))
+    for i in (1, 2, 3):
+        candidates.append((row[f"Request {i}"], row[f"Roommate {i}'s Grade:"]))
+
+    seen, merged = set(), []
+    for name, g in candidates:
+        n = clean(name)
+        if n.lower() in PLACEHOLDERS or n.lower() in seen:
+            continue
+        seen.add(n.lower())
+        merged.append((n, clean_grade(g)))
+
+    if len(merged) > 3:
+        print(f"WARNING: {row['Full Name']} has {len(merged)} distinct requests; keeping the first 3")
+    merged = merged[:3]
+
+    for i in (1, 2, 3):
+        n, g = merged[i - 1] if i <= len(merged) else ("", "")
+        df.at[idx, f"Request {i}"] = n
+        df.at[idx, f"Roommate {i}'s Grade:"] = g
+
+    m = re.search(r"\d+", clean(row[COUNT]))
+    if m:
+        df.at[idx, COUNT] = m.group()
+
+    df.at[idx, "Grade:"] = clean_grade(row["Grade:"])
+    df.at[idx, "Gender"] = clean(row["Gender"])
+
+df.to_csv(SRC, index=False)
+
+after = (df[["Request 1", "Request 2", "Request 3"]].map(lambda x: clean(x).lower() not in PLACEHOLDERS).any(axis=1)).sum()
+print(f"Students with at least one request: before={before}, after={after}")
+print(f"Wrote cleaned {SRC} (original saved as {BACKUP})")

@@ -51,14 +51,22 @@ for _, err in missing_last.iterrows():
         df.loc[mask, "Legal Last Name"] = fix
         fixes_applied.append(f"Missing Last Name: '{err['Student']}' → '{fix}'")
 
+# ---- Roommate count: never overwrite a valid original (1-4) ----
 count_errors = errors[errors["Error Type"] == "Invalid Roommate Count"]
 col_num = "Number of Requested Roommates (including yourself):"
 for _, err in count_errors.iterrows():
     fix = str(err["Suggested Fix"]).strip()
-    if fix and fix != "nan":
-        mask = df["Full Name"] == err["Student"]
-        df.loc[mask, col_num] = int(fix)
-        fixes_applied.append(f"Roommate Count: '{err['Student']}' → {fix}")
+    if not fix or fix == "nan":
+        continue
+    mask = df["Full Name"] == err["Student"]
+    if not mask.any():
+        continue
+    original = pd.to_numeric(df.loc[mask, col_num], errors="coerce").iloc[0]
+    if pd.notna(original) and 1 <= original <= 4:
+        print(f"  (kept original count {int(original)} for '{err['Student']}', fix suggested {fix})")
+        continue
+    df.loc[mask, col_num] = str(int(float(fix)))
+    fixes_applied.append(f"Roommate Count: '{err['Student']}' → {fix}")
 
 name_renames = {}
 
@@ -101,8 +109,17 @@ for old, new in name_renames.items():
         if reg_info:
             df.loc[mask, "Legal First Name"] = reg_info["first"]
             df.loc[mask, "Legal Last Name"] = reg_info["last"]
+            # Grade: only fill if blank. Never overwrite the student's own grade.
             if reg_info["grade"]:
-                df.loc[mask, "Grade:"] = int(reg_info["grade"])
+                try:
+                    reg_grade = int(float(reg_info["grade"]))
+                except ValueError:
+                    reg_grade = None
+                cur = pd.to_numeric(df.loc[mask, "Grade:"], errors="coerce").iloc[0]
+                if reg_grade is not None and pd.isna(cur):
+                    df.loc[mask, "Grade:"] = reg_grade
+                elif reg_grade is not None and int(cur) != reg_grade:
+                    print(f"  (kept grade {int(cur)} for '{new}'; registered.csv says {reg_grade})")
     for col in request_cols:
         df[col] = df[col].replace(old, new)
     fixes_applied.append(f"Full Name: '{old}' → '{new}' (all fields updated)")
@@ -166,7 +183,10 @@ for _, err in grade_errors.iterrows():
     if fix and fix != "nan":
         grade_col = f"Roommate {req_num}'s Grade:"
         mask = df["Full Name"] == student
-        df.loc[mask, grade_col] = int(fix)
+        try:
+            df.loc[mask, grade_col] = int(float(fix))
+        except ValueError:
+            continue
         fixes_applied.append(f"Grade Fix: '{student}' Request {req_num} grade → {fix}")
 
 OUTPUT_FILE = "students_corrected.csv"

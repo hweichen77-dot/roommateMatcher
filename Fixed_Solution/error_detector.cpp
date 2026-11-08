@@ -32,25 +32,64 @@ string trim(const string& s) {
 }
 
 string toLower(string s) {
-    transform(s.begin(), s.end(), s.begin(), ::tolower);
+    transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return tolower(c); });
     return s;
+}
+
+// Collapse runs of whitespace into a single space (after trimming).
+string collapseSpaces(const string& s) {
+    string t = trim(s);
+    string out;
+    bool prevSpace = false;
+    for (char c : t) {
+        if (c == ' ' || c == '\t') {
+            if (!prevSpace) out += ' ';
+            prevSpace = true;
+        } else {
+            out += c;
+            prevSpace = false;
+        }
+    }
+    return out;
+}
+
+// Normalized comparison key: lowercase, single spaces, no nbsp.
+string key(const string& s) {
+    return toLower(collapseSpaces(s));
 }
 
 string toTitleCase(const string& s) {
     string upper = s, lower = s;
-    transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-    transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    transform(upper.begin(), upper.end(), upper.begin(), [](unsigned char c) { return toupper(c); });
+    transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return tolower(c); });
     if (s != upper && s != lower) return s;
     string result = lower;
     bool cap = true;
     for (size_t i = 0; i < result.size(); i++) {
-        if (cap && isalpha(result[i])) {
-            result[i] = toupper(result[i]);
+        if (cap && isalpha((unsigned char)result[i])) {
+            result[i] = toupper((unsigned char)result[i]);
             cap = false;
         }
         if (result[i] == ' ' || result[i] == '-') cap = true;
     }
     return result;
+}
+
+// Wrap a value in quotes and double any inner quotes so the CSV stays valid.
+string q(const string& s) {
+    string r = "\"";
+    for (char c : s) {
+        if (c == '"') r += "\"\"";
+        else r += c;
+    }
+    r += "\"";
+    return r;
+}
+
+void emit(const string& student, int row, const string& reqNum, const string& type,
+          const string& details, const string& fix) {
+    cout << q(student) << "," << row << "," << reqNum << "," << type << ","
+         << q(details) << "," << q(fix) << endl;
 }
 
 vector<string> parseCSVLine(const string& line) {
@@ -79,7 +118,7 @@ int levenshtein(const string& a, const string& b) {
     for (int j = 0; j <= n; j++) dp[0][j] = j;
     for (int i = 1; i <= m; i++)
         for (int j = 1; j <= n; j++) {
-            int cost = (tolower(a[i-1]) != tolower(b[j-1])) ? 1 : 0;
+            int cost = (tolower((unsigned char)a[i-1]) != tolower((unsigned char)b[j-1])) ? 1 : 0;
             dp[i][j] = min({dp[i-1][j] + 1, dp[i][j-1] + 1, dp[i-1][j-1] + cost});
         }
     return dp[m][n];
@@ -88,8 +127,9 @@ int levenshtein(const string& a, const string& b) {
 string findClosest(const string& name, const set<string>& names, int threshold = 3) {
     string best;
     int bestDist = threshold + 1;
+    string nk = key(name);
     for (const auto& n : names) {
-        int d = levenshtein(toLower(name), toLower(n));
+        int d = levenshtein(nk, key(n));
         if (d > 0 && d < bestDist) {
             bestDist = d;
             best = n;
@@ -98,28 +138,39 @@ string findClosest(const string& name, const set<string>& names, int threshold =
     return best;
 }
 
+// Reads the first run of digits (e.g. "3 (including myself)" -> 3, "9.0" -> 9). 0 if none.
+int parseLeadingNumber(const string& s) {
+    size_t i = 0;
+    while (i < s.size() && !isdigit((unsigned char)s[i])) i++;
+    if (i == s.size()) return 0;
+    int value = 0;
+    while (i < s.size() && isdigit((unsigned char)s[i])) {
+        value = value * 10 + (s[i] - '0');
+        if (value > 1000) break;
+        i++;
+    }
+    return value;
+}
+
 int main() {
     ifstream regFile("registered.csv");
     if (!regFile.is_open()) { cerr << "Cannot open registered.csv\n"; return 1; }
 
-    set<string> registeredNames;
-    map<string, vector<string>> regFirstToFull;
-    map<string, vector<string>> regLastToFull;
+    set<string> registeredNames;                  // normalized keys
+    map<string, vector<string>> regFirstToFull;   // key(first) -> full names
+    map<string, vector<string>> regLastToFull;    // key(last)  -> full names
     set<string> regOrigCase;
-    map<string, string> regNameToGrade;
     string line;
     while (getline(regFile, line)) {
         auto fields = parseCSVLine(line);
         if (fields.size() >= 2) {
-            string first = trim(fields[0]);
-            string last = trim(fields[1]);
+            string first = collapseSpaces(fields[0]);
+            string last = collapseSpaces(fields[1]);
             string fullName = first + " " + last;
-            string grade = (fields.size() >= 4) ? trim(fields[3]) : "";
-            registeredNames.insert(toLower(fullName));
-            regFirstToFull[toLower(first)].push_back(fullName);
-            regLastToFull[toLower(last)].push_back(fullName);
+            registeredNames.insert(key(fullName));
+            regFirstToFull[key(first)].push_back(fullName);
+            regLastToFull[key(last)].push_back(fullName);
             regOrigCase.insert(fullName);
-            regNameToGrade[toLower(fullName)] = grade;
         }
     }
     regFile.close();
@@ -153,8 +204,9 @@ int main() {
     };
 
     vector<StudentRow> students;
-    set<string> fullNames;
-    map<string, string> nameToGrade;
+    set<string> fullNames;                 // exact stored names
+    map<string, string> nameToGrade;       // exact name -> grade
+    map<string, string> keyToName;         // normalized key -> stored name
 
     int rowNum = 1;
     while (getline(stuFile, line)) {
@@ -180,6 +232,7 @@ int main() {
 
         fullNames.insert(s.fullName);
         nameToGrade[s.fullName] = s.grade;
+        if (!keyToName.count(key(s.fullName))) keyToName[key(s.fullName)] = s.fullName;
         students.push_back(s);
     }
     stuFile.close();
@@ -189,68 +242,76 @@ int main() {
     for (const auto& s : students) {
         if (!s.gender.empty() && s.gender != "Male" && s.gender != "Female") {
             string suggestion = "";
-            if (toLower(s.gender).find("fem") != string::npos || toLower(s.gender).find("fem") == 0)
+            string g = toLower(s.gender);
+            if (g.find("fem") != string::npos)
                 suggestion = "Female";
-            else if (toLower(s.gender).find("mal") != string::npos)
+            else if (g.find("mal") != string::npos)
                 suggestion = "Male";
-            cout << s.fullName << "," << s.rowNum << ",N/A,Invalid Gender,\""
-                 << "Gender value is '" << s.gender << "'\",\"" << suggestion << "\"" << endl;
+            emit(s.fullName, s.rowNum, "N/A", "Invalid Gender",
+                 "Gender value is '" + s.gender + "'", suggestion);
         }
 
         if (s.legalLast.empty()) {
             string suggested = "";
             size_t sp = s.fullName.find(' ');
             if (sp != string::npos) suggested = s.fullName.substr(sp + 1);
-            cout << s.fullName << "," << s.rowNum << ",N/A,Missing Last Name,\""
-                 << "Legal Last Name column is empty\",\"" << suggested << "\"" << endl;
+            emit(s.fullName, s.rowNum, "N/A", "Missing Last Name",
+                 "Legal Last Name column is empty", suggested);
         }
 
         if (!s.legalFirst.empty() && !s.legalLast.empty()) {
             string expected = s.legalFirst + " " + s.legalLast;
-            if (toLower(expected) != toLower(s.fullName)) {
-                cout << s.fullName << "," << s.rowNum << ",N/A,Name Mismatch,\""
-                     << "Full Name '" << s.fullName << "' does not match Legal Name '" << expected
-                     << "'\",\"" << expected << "\"" << endl;
+            if (key(expected) != key(s.fullName)) {
+                emit(s.fullName, s.rowNum, "N/A", "Name Mismatch",
+                     "Full Name '" + s.fullName + "' does not match Legal Name '" + expected + "'",
+                     expected);
             }
         }
 
-        if (registeredNames.find(toLower(s.fullName)) == registeredNames.end()) {
+        if (registeredNames.find(key(s.fullName)) == registeredNames.end()) {
             string suggestion = "";
-            string firstName = s.fullName, lastName = "";
+            string clean = collapseSpaces(s.fullName);
+            string firstName = clean, lastName = "";
             size_t sp = firstName.find(' ');
             if (sp != string::npos) {
                 lastName = firstName.substr(sp + 1);
                 firstName = firstName.substr(0, sp);
             }
 
-            auto it = regFirstToFull.find(toLower(firstName));
+            auto it = regFirstToFull.find(key(firstName));
             if (it != regFirstToFull.end() && it->second.size() == 1) {
                 suggestion = toTitleCase(it->second[0]);
             } else if (it != regFirstToFull.end() && it->second.size() > 1) {
                 set<string> candidates(it->second.begin(), it->second.end());
-                suggestion = toTitleCase(findClosest(s.fullName, candidates, 100));
+                suggestion = toTitleCase(findClosest(clean, candidates, 100));
             } else if (!lastName.empty()) {
-                auto itL = regLastToFull.find(toLower(lastName));
+                auto itL = regLastToFull.find(key(lastName));
                 if (itL != regLastToFull.end() && itL->second.size() == 1) {
                     suggestion = toTitleCase(itL->second[0]);
                 } else if (itL != regLastToFull.end() && itL->second.size() > 1) {
                     set<string> candidates(itL->second.begin(), itL->second.end());
-                    suggestion = toTitleCase(findClosest(s.fullName, candidates, 100));
+                    suggestion = toTitleCase(findClosest(clean, candidates, 100));
                 } else {
-                    suggestion = toTitleCase(findClosest(s.fullName, regOrigCase));
+                    suggestion = toTitleCase(findClosest(clean, regOrigCase));
                 }
             } else {
-                suggestion = toTitleCase(findClosest(s.fullName, regOrigCase));
+                suggestion = toTitleCase(findClosest(clean, regOrigCase));
             }
-            cout << s.fullName << "," << s.rowNum << ",N/A,Name Not Registered,\""
-                 << "'" << s.fullName << "' not found in registered.csv\",\"" << suggestion << "\"" << endl;
+            emit(s.fullName, s.rowNum, "N/A", "Name Not Registered",
+                 "'" + s.fullName + "' not found in registered.csv", suggestion);
         }
 
+        // Roommate count: only flag if the first number in the cell is not 1-4.
+        // Suggested fix = the student plus each non-empty request.
         if (!s.numReq.empty()) {
-            int n = atoi(s.numReq.c_str());
+            int n = parseLeadingNumber(s.numReq);
             if (n < 1 || n > 4) {
-                cout << s.fullName << "," << s.rowNum << ",N/A,Invalid Roommate Count,\""
-                     << "Requested " << n << " roommates (max 4)\",\"4\"" << endl;
+                int actual = 1;
+                for (int i = 0; i < 3; i++) {
+                    if (!s.req[i].empty()) actual++;
+                }
+                emit(s.fullName, s.rowNum, "N/A", "Invalid Roommate Count",
+                     "Requested " + to_string(n) + " roommates (max 4)", to_string(actual));
             }
         }
 
@@ -259,35 +320,48 @@ int main() {
             if (s.req[i].empty()) continue;
 
             string reqName = s.req[i];
-            int reqNum = i + 1;
+            string reqNum = to_string(i + 1);
+            string rk = key(reqName);
 
-            string reqLower = toLower(reqName);
-            if (seenRequests.count(reqLower)) {
-                cout << s.fullName << "," << s.rowNum << "," << reqNum
-                     << ",Duplicate Request,\"'" << reqName << "' appears more than once\",\"Remove duplicate\"" << endl;
+            if (seenRequests.count(rk)) {
+                emit(s.fullName, s.rowNum, reqNum, "Duplicate Request",
+                     "'" + reqName + "' appears more than once", "Remove duplicate");
                 continue;
             }
-            seenRequests.insert(reqLower);
+            seenRequests.insert(rk);
 
-            if (toLower(reqName) == toLower(s.fullName)) {
-                cout << s.fullName << "," << s.rowNum << "," << reqNum
-                     << ",Self Request,\"Student requested themselves\",\"Remove self-request\"" << endl;
+            if (rk == key(s.fullName)) {
+                emit(s.fullName, s.rowNum, reqNum, "Self Request",
+                     "Student requested themselves", "Remove self-request");
                 continue;
             }
 
+            // Exact match required, since fix_errors.py and the room script compare names.
+            // If it only matches after normalizing (case / spacing), flag it and suggest the
+            // student's stored name so fix_errors.py rewrites the request to match exactly.
             if (fullNames.find(reqName) == fullNames.end()) {
-                string suggestion = findClosest(reqName, fullNames);
-                cout << s.fullName << "," << s.rowNum << "," << reqNum
-                     << ",Name Not Found,\"'" << reqName << "' not in student list\",\"" << suggestion << "\"" << endl;
+                string suggestion;
+                auto kn = keyToName.find(rk);
+                if (kn != keyToName.end()) suggestion = kn->second;
+                else suggestion = findClosest(reqName, fullNames);
+                emit(s.fullName, s.rowNum, reqNum, "Name Not Found",
+                     "'" + reqName + "' not in student list", suggestion);
             }
 
-            if (!s.reqGrade[i].empty() && fullNames.find(reqName) != fullNames.end()) {
-                string actualGrade = nameToGrade[reqName];
-                if (!actualGrade.empty() && s.reqGrade[i] != actualGrade) {
-                    cout << s.fullName << "," << s.rowNum << "," << reqNum
-                         << ",Grade Mismatch,\"Listed grade " << s.reqGrade[i]
-                         << " for '" << reqName << "' but actual grade is " << actualGrade
-                         << "\",\"" << actualGrade << "\"" << endl;
+            // Grade mismatch: compare as numbers so "9" and "9.0" count as equal.
+            string lookupName = reqName;
+            if (fullNames.find(lookupName) == fullNames.end()) {
+                auto kn = keyToName.find(rk);
+                if (kn != keyToName.end()) lookupName = kn->second;
+            }
+               if (!s.reqGrade[i].empty() && fullNames.find(lookupName) != fullNames.end()) {
+                string actualGrade = nameToGrade[lookupName];
+                if (!actualGrade.empty() &&
+                    parseLeadingNumber(s.reqGrade[i]) != parseLeadingNumber(actualGrade)) {
+                    emit(s.fullName, s.rowNum, reqNum, "Grade Mismatch",
+                         "Listed grade " + s.reqGrade[i] + " for '" + reqName +
+                         "' but actual grade is " + actualGrade,
+                         actualGrade);
                 }
             }
         }

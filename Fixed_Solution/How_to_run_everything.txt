@@ -67,4 +67,4 @@ Use run.bat on Windows and skip the commands from the Mac steps. If you type .\e
 
 4) Run the roommate assignment code
 
-Double click the roommateMatcher code (within your Fixed_Solution folder) then it will start running. Will take about 5-10 mins.
+Open the roommateMatcher (located within your Fixed_Solution folder) in powershell then it will start running. 
